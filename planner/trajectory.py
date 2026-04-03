@@ -4,7 +4,7 @@ class FootTrajectory:
     def __init__(self, config):
         self.cfg = config
 
-    def evaluate(self, t):
+    def evaluate(self, t, direction=1, lateral=0):
         T = self.cfg.cycle_time
         L = self.cfg.step_length
         h = self.cfg.step_height
@@ -14,12 +14,12 @@ class FootTrajectory:
 
         if t < half_T:
             # STANCE
-            x = L/2 - L * (t / half_T)
+            x = direction*(L/2 - L) * (t / half_T)
             z = z0
         else:
             # SWING
             s = (t - half_T) / half_T
-            x = -L/2 + L * s
+            x = direction*(-L/2 + L * s)
             z = z0 + h * np.sin(np.pi * s)
 
         return np.array([x, 0.0, z])

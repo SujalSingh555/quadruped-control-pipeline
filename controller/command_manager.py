@@ -3,13 +3,15 @@ class CommandManager:
         self.current_command = "IDLE"
 
     def update(self, joystick_input):
-        if joystick_input == "FORWARD":
-            self.current_command = "TROT_FORWARD"
-        elif joystick_input == "LEFT":
-            self.current_command = "TURN_LEFT"
-        elif joystick_input == "RIGHT":
-            self.current_command = "TURN_RIGHT"
-        else:
-            self.current_command = "IDLE"
+        mapping = {
+            "FORWARD": "TROT_FORWARD",
+            "BACKWARD": "TROT_BACKWARD",
+            "LEFT": "TURN_LEFT",
+            "RIGHT": "TURN_RIGHT",
+            "STOP": "IDLE"
+        }
 
+        key = joystick_input.upper().strip()
+
+        self.current_command = mapping.get(key, "IDLE")
         return self.current_command

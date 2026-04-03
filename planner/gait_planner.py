@@ -8,7 +8,7 @@ class GaitPlanner:
         self.traj = FootTrajectory(config)
         self.ik = LegIK(config)
 
-        self.time = 0.0
+        self.phase = 0.0   # 🔥 replaced time with phase
         self.current_gait = "IDLE"
 
     def set_gait(self, gait_name):
@@ -16,15 +16,35 @@ class GaitPlanner:
             self.current_gait = gait_name
 
     def step(self):
-        self.time += self.cfg.dt
-
         gait = GAITS[self.current_gait]
         joint_targets = {}
 
-        for leg, phase in gait["phase_offsets"].items():
-            t_leg = (self.time + phase * self.cfg.cycle_time) % self.cfg.cycle_time
+        # 🔥 1. Decide direction
+        if "BACKWARD" in self.current_gait:
+            direction = -1
+        else:
+            direction = 1
 
-            foot_pos = self.traj.evaluate(t_leg)
+        print ("direction:",direction)
+
+        # 🔥 2. Update phase (THIS IS THE KEY FIX)
+        self.phase += direction * self.cfg.dt
+        self.phase = self.phase % self.cfg.cycle_time
+
+        # (future: sideways)
+        lateral = 0
+
+        # 🔥 3. Compute per-leg motion
+        for leg, phase_offset in gait["phase_offsets"].items():
+            t_leg = (self.phase + phase_offset * self.cfg.cycle_time) % self.cfg.cycle_time
+
+            foot_pos = self.traj.evaluate(
+                t_leg,
+                direction=1,      # ⚠️ IMPORTANT: keep this 1 now
+                lateral=lateral
+            )
+
             joint_targets[leg] = self.ik.solve(foot_pos)
+        print("GAIT:", repr(self.current_gait))
 
         return joint_targets
