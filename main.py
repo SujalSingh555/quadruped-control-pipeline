@@ -27,7 +27,7 @@ def main():
 
         # 1. Try getting input (non-blocking fallback)
         try:
-            user_input = get_input()
+            user_input = "FORWARD"
             last_input = user_input
         except:
             user_input = last_input  # keep previous command
