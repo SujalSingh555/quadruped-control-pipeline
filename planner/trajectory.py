@@ -14,7 +14,7 @@ class FootTrajectory:
 
         if t < half_T:
             # STANCE
-            x = direction*(L/2 - L) * (t / half_T)
+            x = direction*(L/2 - L* (t / half_T))
             z = z0
         else:
             # SWING

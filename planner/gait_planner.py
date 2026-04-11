@@ -25,7 +25,7 @@ class GaitPlanner:
         else:
             direction = 1
 
-        print ("direction:",direction)
+        #print ("direction:",direction)
 
         # 🔥 2. Update phase (THIS IS THE KEY FIX)
         self.phase += direction * self.cfg.dt
@@ -45,6 +45,6 @@ class GaitPlanner:
             )
 
             joint_targets[leg] = self.ik.solve(foot_pos)
-        print("GAIT:", repr(self.current_gait))
+        #print("GAIT:", repr(self.current_gait))
 
         return joint_targets
