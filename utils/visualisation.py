@@ -7,6 +7,7 @@ from config.robot_config import RobotConfig
 
 class QuadrupedVisualiser:
     def __init__(self, cfg):
+        self.cfg = cfg
         self.L1 = cfg.L1
         self.L2 = cfg.L2
 
@@ -17,8 +18,44 @@ class QuadrupedVisualiser:
         else:
             self.app = app
 
-        self.win = pg.GraphicsLayoutWidget(show=True, title="Quadruped Leg Forward Kinematics")
-        self.win.resize(800, 600)
+        # Main window wrapping both plots and controls
+        self.main_win = QtWidgets.QWidget()
+        self.main_win.setWindowTitle("Quadruped Leg Forward Kinematics & Controls")
+        self.main_win.resize(800, 700)
+        
+        self.layout = QtWidgets.QVBoxLayout(self.main_win)
+        
+        # Plot Widget
+        self.win = pg.GraphicsLayoutWidget()
+        self.layout.addWidget(self.win)
+        
+        # Controls Layout
+        self.controls_layout = QtWidgets.QHBoxLayout()
+        self.layout.addLayout(self.controls_layout)
+        
+        # Helper function to add a spinbox
+        def add_control(name, min_val, max_val, step, default_val, attr_name):
+            vbox = QtWidgets.QVBoxLayout()
+            label = QtWidgets.QLabel(name)
+            
+            spinbox = QtWidgets.QDoubleSpinBox()
+            spinbox.setRange(min_val, max_val)
+            spinbox.setSingleStep(step)
+            spinbox.setValue(default_val)
+            
+            # Update the configuration dynamically when value changes
+            spinbox.valueChanged.connect(lambda v: setattr(self.cfg, attr_name, v))
+            
+            vbox.addWidget(label)
+            vbox.addWidget(spinbox)
+            self.controls_layout.addLayout(vbox)
+
+        # Add controls that adjust the gait configuration live!
+        add_control("Step Length", 0.01, 0.30, 0.01, self.cfg.step_length, "step_length")
+        add_control("Step Height", 0.01, 0.15, 0.01, self.cfg.step_height, "step_height")
+        add_control("Cycle Time (s)", 0.2, 5.0, 0.1, self.cfg.cycle_time, "cycle_time")
+        
+        self.main_win.show()
 
         self.plots = {}
         self.lines = {}
