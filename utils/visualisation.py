@@ -21,7 +21,7 @@ class QuadrupedVisualiser:
         # Main window wrapping both plots and controls
         self.main_win = QtWidgets.QWidget()
         self.main_win.setWindowTitle("Quadruped Leg Forward Kinematics & Controls")
-        self.main_win.resize(800, 700)
+        self.main_win.resize(1000, 900)
         
         self.layout = QtWidgets.QVBoxLayout(self.main_win)
         
@@ -80,6 +80,33 @@ class QuadrupedVisualiser:
             if i == 1:
                 self.win.nextRow()
 
+        # Add new plots for Velocity and Acceleration of FL leg
+        self.win.nextRow()
+        
+        self.history_len = 100
+        self.fl_vel_history = np.zeros((3, self.history_len))
+        self.fl_acc_history = np.zeros((3, self.history_len))
+        self.prev_fl_angles = None
+        self.prev_fl_vel = np.zeros(3)
+
+        self.p_vel = self.win.addPlot(title="FL Velocity (rad/s)")
+        self.p_vel.addLegend()
+        self.p_vel.showGrid(x=True, y=True)
+        self.vel_curves = [
+            self.p_vel.plot(pen='r', name="Hip"),
+            self.p_vel.plot(pen='g', name="Thigh"),
+            self.p_vel.plot(pen='b', name="Knee")
+        ]
+        
+        self.p_acc = self.win.addPlot(title="FL Acceleration (rad/s²)")
+        self.p_acc.addLegend()
+        self.p_acc.showGrid(x=True, y=True)
+        self.acc_curves = [
+            self.p_acc.plot(pen='r', name="Hip"),
+            self.p_acc.plot(pen='g', name="Thigh"),
+            self.p_acc.plot(pen='b', name="Knee")
+        ]
+
     def update_view(self, joint_targets, loop_count=0, total_elapsed=0.0):
         """
         Receives joint_targets from main.py, calculates Forward Kinematics,
@@ -88,6 +115,27 @@ class QuadrupedVisualiser:
         bot_time = loop_count * self.cfg.dt
         delay = total_elapsed - bot_time
         self.time_label.setText(f"<span style='font-size: 16pt; font-weight: bold;'>Total Elapsed: {total_elapsed:.4f}s | Bot Time: {bot_time:.4f}s | Delay: {delay:.4f}s</span>")
+
+        # --- Calculate Velocity & Acceleration out of main.py ---
+        fl_angles = np.array(joint_targets["FL"])
+        if self.prev_fl_angles is None:
+            self.prev_fl_angles = fl_angles
+
+        curr_vel = (fl_angles - self.prev_fl_angles) / self.cfg.dt
+        curr_acc = (curr_vel - self.prev_fl_vel) / self.cfg.dt
+        
+        self.prev_fl_angles = fl_angles
+        self.prev_fl_vel = curr_vel
+        
+        self.fl_vel_history = np.roll(self.fl_vel_history, -1, axis=1)
+        self.fl_vel_history[:, -1] = curr_vel
+        self.fl_acc_history = np.roll(self.fl_acc_history, -1, axis=1)
+        self.fl_acc_history[:, -1] = curr_acc
+
+        for j in range(3):
+            self.vel_curves[j].setData(self.fl_vel_history[j])
+            self.acc_curves[j].setData(self.fl_acc_history[j])
+        # --------------------------------------------------------
 
         for leg in self.leg_names:
             angles = joint_targets[leg]
