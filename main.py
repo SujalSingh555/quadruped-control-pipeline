@@ -6,7 +6,7 @@ from controller.command_manager import CommandManager
 from input.joystick import get_input
 from utils.conversions import to_degrees, flatten
 from comms.sender import send
-from utils.visualisation import QuadrupedVisualiser
+from utils.visualisation import QuadrupedVisualiser, MotorVelocityVisualiser
 
 
 def main():
@@ -15,6 +15,7 @@ def main():
     planner = GaitPlanner(cfg)
     cmd_manager = CommandManager()
     vis = QuadrupedVisualiser(cfg)
+    vis_vel = MotorVelocityVisualiser(cfg)
 
     print("Quadruped Control Started...\n")
 
@@ -56,6 +57,7 @@ def main():
         
         # 5.1 Call visualization class simultaneously!
         vis.update_view(joint_targets_rad)
+        vis_vel.update_view(joint_targets_rad)
 
         # 6. Maintain loop rate
         elapsed = time.time() - start_time
