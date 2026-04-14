@@ -11,5 +11,4 @@ def send(joint_array):
     #joint_array[7]=-1*(joint_array[7]+90) 
     #joint_array[10]=-1*(joint_array[10]+90)   
     print("Sending:", joint_array)
-
     

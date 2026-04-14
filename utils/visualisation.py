@@ -61,6 +61,10 @@ class QuadrupedVisualiser:
         self.lines = {}
         self.leg_names = ["FL", "FR", "BL", "BR"]
 
+        # Add time tracking label spanning the top
+        self.time_label = self.win.addLabel("Total Elapsed: 0.00s | Bot Time: 0.00s | Delay: 0.00s", col=0, colspan=2)
+        self.win.nextRow()
+
         # Create 4 plots for 4 legs (2x2 grid as you preferred)
         for i, leg in enumerate(self.leg_names):
             p = self.win.addPlot(title=f"Leg: {leg}")
@@ -76,11 +80,15 @@ class QuadrupedVisualiser:
             if i == 1:
                 self.win.nextRow()
 
-    def update_view(self, joint_targets):
+    def update_view(self, joint_targets, loop_count=0, total_elapsed=0.0):
         """
         Receives joint_targets from main.py, calculates Forward Kinematics,
         and renders them onto the graph.
         """
+        bot_time = loop_count * self.cfg.dt
+        delay = total_elapsed - bot_time
+        self.time_label.setText(f"<span style='font-size: 16pt; font-weight: bold;'>Total Elapsed: {total_elapsed:.4f}s | Bot Time: {bot_time:.4f}s | Delay: {delay:.4f}s</span>")
+
         for leg in self.leg_names:
             angles = joint_targets[leg]
             # angles[0] = theta0, angles[1] = theta1 (thigh pitch), angles[2] = theta2 (knee pitch)

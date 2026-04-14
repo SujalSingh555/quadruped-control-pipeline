@@ -20,12 +20,12 @@ def main():
 
     last_input = "STOP"
 
-    
-
-   
+    loop_count = 0
+    global_start_time = time.time()
+    next_loop_time = global_start_time
 
     while True:
-        start_time = time.time()
+        loop_count += 1
         
         # 1. Try getting input (non-blocking fallback)
         try:
@@ -55,12 +55,14 @@ def main():
         send(flat)
         
         # 5.1 Call visualization class simultaneously!
-        vis.update_view(joint_targets_rad)
+        total_elapsed = time.time() - global_start_time
+        vis.update_view(joint_targets_rad, loop_count, total_elapsed)
 
-        # 6. Maintain loop rate
-        elapsed = time.time() - start_time
-        sleep_time = max(0, cfg.dt - elapsed)
-        time.sleep(sleep_time)
+        # 6. Maintain loop rate (No-drift delay compensation)
+        next_loop_time += cfg.dt
+        sleep_time = next_loop_time - time.time()
+        if sleep_time > 0:
+            time.sleep(sleep_time)
 
 
 if __name__ == "__main__":
