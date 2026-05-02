@@ -12,8 +12,8 @@ def send(joint_array):
 
     print("s", joint_array)
 
-    a = joint_array[1] + 37
-    b = joint_array[2] - 90 + 55
+    a = joint_array[1] 
+    b = joint_array[2] 
 
     angle = [a, b]
 
