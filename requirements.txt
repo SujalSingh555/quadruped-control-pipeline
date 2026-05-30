@@ -1,0 +1,5 @@
+numpy
+pyqtgraph
+PyQt5
+# Optional: uncomment if using serial communication hardware
+# pyserial
