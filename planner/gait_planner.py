@@ -1,6 +1,6 @@
 from planner.trajectory import FootTrajectory
 from kinematics.inverse_kinematics import LegIK
-from config.robot_config import GAITS
+from planner.gait_library import GAITS
 
 class GaitPlanner:
     def __init__(self, config):
@@ -9,7 +9,7 @@ class GaitPlanner:
         self.ik = LegIK(config)
 
         self.phase = 0.0   #  replaced time with phase
-        self.current_gait = "TROT_FORWARD"
+        self.current_gait = "FORWARD"
 
     def set_gait(self, gait_name):
         if gait_name in GAITS:
@@ -49,7 +49,7 @@ class GaitPlanner:
             foot_pos = self.traj.evaluate(
                 t_leg,
                 direction=direction,
-                lateral=lateral
+                lateral=int(lateral)
             )
 
             joint_targets[leg] = self.ik.solve(foot_pos)

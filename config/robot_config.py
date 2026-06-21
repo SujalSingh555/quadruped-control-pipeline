@@ -14,6 +14,8 @@ class RobotConfig:
     # Timing
     cycle_time: float = 2
     dt: float = 0.06  # 50 Hz
+    # Current target direction; UI sets this dynamically
+    target_direction: str = "STOP"
 
 GAITS = {
     "IDLE": {
@@ -29,12 +31,6 @@ GAITS = {
         "phase_offsets": {"FL": 0.5, "BR": 0.5, "FR": 0.0, "BL": 0.0}
     },
     "TROT_BACKWARD": {
-        "phase_offsets": {"FL": 0.0, "BR": 0.0, "FR": 0.5, "BL": 0.5}
-    },
-    "MOVE_LEFT": {
-        "phase_offsets": {"FL": 0.0, "BR": 0.0, "FR": 0.5, "BL": 0.5}
-    },
-    "MOVE_RIGHT": {
         "phase_offsets": {"FL": 0.0, "BR": 0.0, "FR": 0.5, "BL": 0.5}
     }
 }

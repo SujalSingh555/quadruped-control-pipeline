@@ -29,7 +29,8 @@ class CommandManager:
             "BACKWARD": "TROT_BACKWARD",
             "LEFT": "TURN_LEFT",
             "RIGHT": "TURN_RIGHT",
-            "STOP": "IDLE"
+            "STOP": "IDLE",
+            "WALK":"WALK"
         }
 
         key = joystick_input.upper().strip()

@@ -56,6 +56,26 @@ class QuadrupedVisualiser:
         add_control("Step Length", 0.01, 0.30, 0.01, self.cfg.step_length, "step_length")
         add_control("Step Height", 0.01, 0.15, 0.01, self.cfg.step_height, "step_height")
         add_control("Cycle Time (s)", 0.2, 5.0, 0.1, self.cfg.cycle_time, "cycle_time")
+        # Direction selector dropdown
+        dir_vbox = QtWidgets.QVBoxLayout()
+        dir_label = QtWidgets.QLabel("Direction")
+        dir_combo = QtWidgets.QComboBox()
+        dir_options = ["STOP", "FORWARD", "BACKWARD", "LEFT", "RIGHT", "WALK"]
+        dir_combo.addItems(dir_options)
+        # initialize from config
+        try:
+            dir_combo.setCurrentText(self.cfg.target_direction)
+        except Exception:
+            pass
+
+        def on_dir_change(text):
+            # store selection in shared config so main loop can read it
+            setattr(self.cfg, 'target_direction', text)
+
+        dir_combo.currentTextChanged.connect(on_dir_change)
+        dir_vbox.addWidget(dir_label)
+        dir_vbox.addWidget(dir_combo)
+        self.controls_layout.addLayout(dir_vbox)
         
         self.main_win.show()
 

@@ -18,7 +18,9 @@ def main():
     print("Quadruped Control Started...\n")
 
     # Set movement direction here: "FORWARD", "BACKWARD", "LEFT", "RIGHT", "STOP"
-    target_direction = "BACKWARD"
+        # Movement direction is selected via the visualiser dropdown (cfg.target_direction)
+        # Defaults to cfg.target_direction (can be changed live from GUI)
+    target_direction = cfg.target_direction
 
     loop_count = 0
     global_start_time = time.time()
@@ -28,7 +30,8 @@ def main():
         loop_count += 1
         
         # 1. Update command based on target direction
-        command = cmd_manager.update(target_direction)
+            # 1. Update command based on target direction selected in GUI
+        command = cmd_manager.update(cfg.target_direction)
         planner.set_gait(command)
 
     
