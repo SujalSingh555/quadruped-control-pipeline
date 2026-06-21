@@ -4,6 +4,8 @@ import numpy as np
 import sys
 
 from config.robot_config import RobotConfig
+from planner.trajectory import FootTrajectory
+from kinematics.inverse_kinematics import LegIK
 
 class QuadrupedVisualiser:
     def __init__(self, cfg):
@@ -65,6 +67,11 @@ class QuadrupedVisualiser:
         self.time_label = self.win.addLabel("Total Elapsed: 0.00s | Bot Time: 0.00s | Delay: 0.00s", col=0, colspan=2)
         self.win.nextRow()
 
+        # Acceleration stats label below the top bar
+        self.acc_stats_label = QtWidgets.QLabel("")
+        self.acc_stats_label.setStyleSheet("font-size: 14pt; font-weight: bold;")
+        self.layout.addWidget(self.acc_stats_label)
+
         # Create 4 plots for 4 legs (2x2 grid as you preferred)
         for i, leg in enumerate(self.leg_names):
             p = self.win.addPlot(title=f"Leg: {leg}")
@@ -107,6 +114,34 @@ class QuadrupedVisualiser:
             self.p_acc.plot(pen='b', name="Knee")
         ]
 
+        self.hip_acc_avg = 0.0
+        self.knee_acc_avg = 0.0
+        self.hip_acc_max = 0.0
+        self.knee_acc_max = 0.0
+
+        # Cycle-based max acceleration tracking removed for now
+        # self.traj = FootTrajectory(self.cfg)
+        # self.ik = LegIK(self.cfg)
+        # self.cycle_hip_acc_max = 0.0
+        # self.cycle_knee_acc_max = 0.0
+        # self.prev_cycle_cfg = (self.cfg.step_height, self.cfg.cycle_time, self.cfg.step_length)
+        # self.recompute_cycle_acc_stats()
+
+    # def recompute_cycle_acc_stats(self):
+    #     cycle_time = self.cfg.cycle_time
+    #     samples = 501
+    #     times = np.linspace(0, cycle_time, samples)
+    #     angles = np.zeros((samples, 3))
+    #     for i, t in enumerate(times):
+    #         foot_pos = self.traj.evaluate(t)
+    #         angles[i] = self.ik.solve(foot_pos)
+
+    #     vel = np.diff(angles, axis=0) / (times[1] - times[0])
+    #     acc = np.diff(vel, axis=0) / (times[1] - times[0])
+
+    #     self.cycle_hip_acc_max = np.max(np.abs(acc[:, 1]))
+    #     self.cycle_knee_acc_max = np.max(np.abs(acc[:, 2]))
+
     def update_view(self, joint_targets, loop_count=0, total_elapsed=0.0):
         """
         Receives joint_targets from main.py, calculates Forward Kinematics,
@@ -131,6 +166,17 @@ class QuadrupedVisualiser:
         self.fl_vel_history[:, -1] = curr_vel
         self.fl_acc_history = np.roll(self.fl_acc_history, -1, axis=1)
         self.fl_acc_history[:, -1] = curr_acc
+
+        self.hip_acc_avg = np.mean(np.abs(self.fl_acc_history[1]))
+        self.knee_acc_avg = np.mean(np.abs(self.fl_acc_history[2]))
+        self.hip_acc_max = np.max(np.abs(self.fl_acc_history[1]))
+        self.knee_acc_max = np.max(np.abs(self.fl_acc_history[2]))
+
+        # Cycle-based max acceleration logic removed for now
+        self.acc_stats_label.setText(
+            f"Hip avg: {self.hip_acc_avg:.2f} rad/s² | Hip max: {self.hip_acc_max:.2f} rad/s²    "
+            f"Knee avg: {self.knee_acc_avg:.2f} rad/s² | Knee max: {self.knee_acc_max:.2f} rad/s²"
+        )
 
         for j in range(3):
             self.vel_curves[j].setData(self.fl_vel_history[j])

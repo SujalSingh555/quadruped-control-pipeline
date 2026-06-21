@@ -1,6 +1,6 @@
 from planner.trajectory import FootTrajectory
 from kinematics.inverse_kinematics import LegIK
-from planner.gait_library import GAITS
+from config.robot_config import GAITS
 
 class GaitPlanner:
     def __init__(self, config):
@@ -8,8 +8,8 @@ class GaitPlanner:
         self.traj = FootTrajectory(config)
         self.ik = LegIK(config)
 
-        self.phase = 0.0   # 🔥 replaced time with phase
-        self.current_gait = "IDLE"
+        self.phase = 0.0   #  replaced time with phase
+        self.current_gait = "TROT_FORWARD"
 
     def set_gait(self, gait_name):
         if gait_name in GAITS:
@@ -19,32 +19,39 @@ class GaitPlanner:
         gait = GAITS[self.current_gait]
         joint_targets = {}
 
-        # 🔥 1. Decide direction
-        if "BACKWARD" in self.current_gait:
-            direction = -1
-        else:
-            direction = 1
+        # 1. Base phase update direction (standard: +1, idle: 0)
+        phase_direction = 0 if self.current_gait == "IDLE" else 1
 
-        #print ("direction:",direction)
-
-        # 🔥 2. Update phase (THIS IS THE KEY FIX)
-        self.phase += direction * self.cfg.dt
+        # Update phase
+        self.phase += phase_direction * self.cfg.dt
         self.phase = self.phase % self.cfg.cycle_time
 
-        # (future: sideways)
-        lateral = 0
-
-        # 🔥 3. Compute per-leg motion
+        # 2. Compute per-leg motion parameters based on gait mode
         for leg, phase_offset in gait["phase_offsets"].items():
             t_leg = (self.phase + phase_offset * self.cfg.cycle_time) % self.cfg.cycle_time
 
+            # Defaults
+            direction = 1
+            lateral = 0.0
+
+            # Determine leg-specific direction and lateral values based on current gait
+            if "BACKWARD" in self.current_gait:
+                direction = -1
+            elif self.current_gait == "TURN_LEFT":
+                # Left legs (FL, BL) go backward, right legs (FR, BR) go forward to rotate CCW
+                direction = -1 if leg in ["FL", "BL"] else 1
+            elif self.current_gait == "TURN_RIGHT":
+                # Left legs (FL, BL) go forward, right legs (FR, BR) go backward to rotate CW
+                direction = 1 if leg in ["FL", "BL"] else -1
+            elif self.current_gait == "IDLE":
+                direction = 0
+
             foot_pos = self.traj.evaluate(
                 t_leg,
-                direction=1,      # ⚠️ IMPORTANT: keep this 1 now
+                direction=direction,
                 lateral=lateral
             )
 
             joint_targets[leg] = self.ik.solve(foot_pos)
-        #print("GAIT:", repr(self.current_gait))
 
         return joint_targets

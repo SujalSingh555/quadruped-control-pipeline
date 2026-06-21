@@ -2,8 +2,7 @@ import time
 
 from config.robot_config import RobotConfig
 from planner.gait_planner import GaitPlanner
-from controller.command_manager import CommandManager
-from input.joystick import get_input
+from controller.input_controller import CommandManager, get_input
 from utils.conversions import to_degrees, flatten
 from comms.sender import send
 from utils.visualisation import QuadrupedVisualiser
@@ -18,7 +17,8 @@ def main():
 
     print("Quadruped Control Started...\n")
 
-    last_input = "STOP"
+    # Set movement direction here: "FORWARD", "BACKWARD", "LEFT", "RIGHT", "STOP"
+    target_direction = "BACKWARD"
 
     loop_count = 0
     global_start_time = time.time()
@@ -27,17 +27,8 @@ def main():
     while True:
         loop_count += 1
         
-        # 1. Try getting input (non-blocking fallback)
-        try:
-            user_input = "FORWARD"
-            last_input = user_input
-        except:
-            user_input = last_input  # keep previous command
-        #print("INPUT:", user_input)
-
-        # 2. Command update
-        command = cmd_manager.update(user_input)
-        #print('command:',command)
+        # 1. Update command based on target direction
+        command = cmd_manager.update(target_direction)
         planner.set_gait(command)
 
     

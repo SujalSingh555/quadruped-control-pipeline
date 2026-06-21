@@ -21,7 +21,7 @@ def send(joint_array):
     for i in range(int(len(joint_array)/3)):
         joint_array[3*i+1] = -1*(joint_array[3*i+1] + 90)
 
-    
+    #print("s", joint_array)
 
     a = joint_array[1] 
     b = joint_array[2] 
