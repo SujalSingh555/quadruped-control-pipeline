@@ -60,7 +60,7 @@ class QuadrupedVisualiser:
         dir_vbox = QtWidgets.QVBoxLayout()
         dir_label = QtWidgets.QLabel("Direction")
         dir_combo = QtWidgets.QComboBox()
-        dir_options = ["STOP", "FORWARD", "BACKWARD", "LEFT", "RIGHT", "WALK"]
+        dir_options = ["STOP", "FORWARD", "BACKWARD", "LEFT", "RIGHT", "WALK", "PACE", "BOUND"]
         dir_combo.addItems(dir_options)
         # initialize from config
         try:
@@ -81,7 +81,9 @@ class QuadrupedVisualiser:
 
         self.plots = {}
         self.lines = {}
-        self.leg_names = ["FL", "FR", "BL", "BR"]
+        # Arrange plots so back legs are on the left column and front legs on the right column
+        # Layout order (row-major, two columns): [left-top, right-top, left-bottom, right-bottom]
+        self.leg_names = ["BL", "FL", "BR", "FR"]
 
         # Add time tracking label spanning the top
         self.time_label = self.win.addLabel("Total Elapsed: 0.00s | Bot Time: 0.00s | Delay: 0.00s", col=0, colspan=2)

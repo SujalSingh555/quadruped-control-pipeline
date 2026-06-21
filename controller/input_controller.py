@@ -30,7 +30,9 @@ class CommandManager:
             "LEFT": "TURN_LEFT",
             "RIGHT": "TURN_RIGHT",
             "STOP": "IDLE",
-            "WALK":"WALK"
+            "WALK":"WALK",
+            "PACE":"PACE",
+            "BOUND":"BOUND"
         }
 
         key = joystick_input.upper().strip()

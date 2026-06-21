@@ -45,6 +45,8 @@ class GaitPlanner:
                 direction = 1 if leg in ["FL", "BL"] else -1
             elif self.current_gait == "IDLE":
                 direction = 0
+            else :
+                direction = 1
 
             foot_pos = self.traj.evaluate(
                 t_leg,
